@@ -1,7 +1,7 @@
 import networkx as nx
 import random
 
-possible_gates = ['and', 'nand', 'or', 'nor', 'xor', 'xnor', 'inv', 'buf']
+possible_gates = ['AND', 'NAND', 'OR', 'NOR', 'XOR', 'XNOR', 'INV', 'BUF']
 
 class RandomGraphGenerator(object):
     def __init__(self, n_inputs, max_nodes_per_level, max_fan_in, max_fan_out, depth) -> None:
@@ -49,7 +49,7 @@ class RandomGraphGenerator(object):
             # V is the destination node for the following connections
             v = self.counter
             # Connect to the previous layer
-            if (node_type == 'inv' or node_type == 'buf'):
+            if (node_type == 'INV' or node_type == 'BUF'):
                 # Get a list of possible connections
                 connectable_nodes = self._getConnectableNodes()
                 # Pick the first (highest priority)
