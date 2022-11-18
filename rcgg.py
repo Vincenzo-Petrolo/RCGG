@@ -60,6 +60,7 @@ if __name__ == "__main__":
             exit(0)
         elif o in ['-v', '--version']:
             print_version()
+            exit(0)
         
         # Try to set parameters
         o = o.replace('-','') # remove the -- at the beginning of the option
