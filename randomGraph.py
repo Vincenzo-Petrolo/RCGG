@@ -4,7 +4,7 @@ import random
 possible_gates = ['AND', 'NAND', 'OR', 'NOR', 'XOR', 'XNOR', 'INV', 'BUF']
 
 class RandomGraphGenerator(object):
-    def __init__(self, n_inputs, n_outputs, max_nodes_per_level, max_fan_in, max_fan_out, depth) -> None:
+    def __init__(self, n_inputs = 2, n_outputs = 2, max_nodes_per_level = 2, max_fan_in = 2, max_fan_out = 2, depth = 2) -> None:
         super().__init__()
         self.n_inputs = n_inputs
         self.n_outputs = n_outputs
