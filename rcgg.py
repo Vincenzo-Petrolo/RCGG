@@ -14,7 +14,7 @@ def print_help():
     print(f"\t--output(-o)\t\t: Name of the final generated bench file")
     print(f"\t--n_inputs=\t\t: Number of inputs to the circuit")
     print(f"\t--n_outputs=\t\t: Number of outputs of the circuit")
-    print(f"\t--max_nodes_per_lvl=\t: Maximum #gates in each level of the circuit")
+    print(f"\t--max_nodes_per_level=\t: Maximum #gates in each level of the circuit")
     print(f"\t--max_fan_in=\t\t: Maximum #fan_in in each gate of the circuit")
     print(f"\t--max_fan_out=\t\t: Maximum #fan_out in each gate of the circuit")
     print(f"\t--depth=\t\t: Depth of the circuit")
@@ -33,7 +33,7 @@ if __name__ == "__main__":
                                                             "output=", 
                                                             "n_inputs=",
                                                             "n_outputs=",
-                                                            "max_nodes_per_lvl=",
+                                                            "max_nodes_per_level=",
                                                             "max_fan_in=",
                                                             "max_fan_out=",
                                                             "depth="])
@@ -44,12 +44,12 @@ if __name__ == "__main__":
     output_filename = None
 
     gen_parameters = {
-        'n_inputs' : None,
-        'n_outputs': None,
-        'max_nodes_per_lvl' : None,
-        'max_fan_in' : None,
-        'max_fan_out' : None,
-        'depth' : None
+        'n_inputs'              : 2,
+        'n_outputs'             : 2,
+        'max_nodes_per_level'   : 2,
+        'max_fan_in'            : 2,
+        'max_fan_out'           : 2,
+        'depth'                 : 2 
     }
 
     for o,a in opts:
@@ -62,8 +62,10 @@ if __name__ == "__main__":
             print_version()
         
         # Try to set parameters
+        o = o.replace('-','') # remove the -- at the beginning of the option
         if (o in gen_parameters.keys()):
-            gen_parameters[o] = a
+            gen_parameters[o] = int(a)
+    
             
 
     # Pass the parameters to the generator
@@ -75,8 +77,8 @@ if __name__ == "__main__":
 
     if (output_filename is None):
         # Use the parameters to generate an hash
-        hashed_value = hash(gen_parameters.values())
-        hashed_value = hashed_value[:(max(3, len(hashed_value)))]
+        hashed_value = str(hash(gen_parameters.values()))
+        hashed_value = hashed_value[:(min(3, len(hashed_value)))]
         output_filename = 'c'+ hashed_value + '.bench'
     
     converter.convert(graph, output_filename)
