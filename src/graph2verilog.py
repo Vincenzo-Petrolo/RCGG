@@ -3,7 +3,16 @@ import os
 
 class Graph2Verilog(object):
     def __init__(self) -> None:
-        pass
+        self.gates_meta = {
+            'inv'   :   0,
+            'buff'   :   0,
+            'and'   :   0,
+            'or'    :   0,
+            'xor'   :   0,
+            'nand'  :   0,
+            'nor'   :   0,
+            'xnor'  :   0
+        }
 
     def convert(self, graph, module_name : str):
         self.module_name = module_name.split('/')[-1]
@@ -20,7 +29,7 @@ class Graph2Verilog(object):
         # Write the body of the module
         self._writeWires(graph_nodes, graph)
         # Write the always block to perform the assignment
-        self._writeAssignments(graph_nodes, graph)
+        self._writeComponents(graph_nodes, graph)
         # Write the end of the module
         self._writeEndModule()
 
@@ -29,6 +38,8 @@ class Graph2Verilog(object):
     
     def _writeModule(self, graph_nodes, graph):
         with open(f"{os.path.join(self.directory, self.module_name)}.v","a") as f:
+            # .. because in the server we run it from a different location
+            f.write(f'`include "../gate_types.v"\n')
             f.write(f"module {self.module_name} (")
             f.write(self._getInputOfModule(graph_nodes))
             f.write(self._getOutputOfModule(graph_nodes, graph))
@@ -43,7 +54,7 @@ class Graph2Verilog(object):
         with open(f"{os.path.join(self.directory, self.module_name)}.v","a") as f:
             f.write(final_string)
 
-    def _writeAssignments(self, graph_nodes, graph):
+    def _writeAssignments(self, graph_nodes : list, graph : nx.DiGraph):
         final_string = "\n"
 
         for node in graph_nodes:
@@ -51,6 +62,42 @@ class Graph2Verilog(object):
         
         with open(f"{os.path.join(self.directory, self.module_name)}.v","a") as f:
             f.write(final_string)
+    
+    def _writeComponents(self, graph_nodes, graph):
+        final_string = "\n"
+
+        for node in graph_nodes:
+            final_string += self._writeComponent(node, graph=graph)
+        
+        with open(f"{os.path.join(self.directory, self.module_name)}.v","a") as f:
+            f.write(final_string)
+
+    def _writeComponent(self, node , graph : nx.DiGraph):
+        if (node[1]['type'] == "input"):
+            return ""
+
+        final_string = ""
+        output = node[0]
+
+        component = str(node[1]['type']).lower() 
+
+        if (component == "not"):
+            component = 'inv'
+
+        counter = self.gates_meta[component]
+        # Increase by 1
+        self.gates_meta[component] += 1
+        # get the inputs to this node
+        predecessors = list(graph.predecessors(node[0]))
+        final_string += f"\t{component}{len(predecessors)} {component}{counter}("
+
+        for pred in predecessors:
+            final_string += f" n{pred},"
+
+        final_string += f"n{output});\n"
+
+        return final_string
+
     
     def _writeEndModule(self):
         with open(f"{os.path.join(self.directory, self.module_name)}.v","a") as f:
